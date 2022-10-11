@@ -1,0 +1,59 @@
+Exportar:
+    - File -> Export
+	     Developer Mode
+		 c:\a_cv (pasta temp)	
+    - importar c:\a_cv\varsis-agr\development\views
+	    tools deve gerar "%PLACEHOLDER% e placeholder
+	- copiar as cvs e o conteudo de info.xml ref as  cvs para : 
+	    C:\Users\varsis_dev_03\Documents\PROJETOS\HANA\deploy 	    
+	- verificar o arquivo info.xml
+         se não for a primeira vez apenas incluir as novas cvs
+    - No arquivo da calculationView:
+          Verificar se está com PLACEHOLDER no schema, ex:
+               <columnObject schemaName="%PLACEHOLDER%" columnObjectName="OUSG"/>
+               maiusculo = banco de dados
+               minusculo = pacote
+    - criar zip de model ex. varsis-agr-v1-0-0.zip (sendTo zip..)
+    - No b1 para achar o gerenciador de modelo, digitar hana para procurar	
+
+Erros:
+   Remover o pacote anterior
+       system
+            sap
+              sbo_carone
+                 remover a pasta ex: varsis-agr	
+   ---------				 
+	     
+Cube x Dimension
+ query -> Dimension
+     Se abrir no editor de texto veria dataCategory = "Dimension"
+ list/Fact -> Cube
+ 
+ recompilar... 
+     - tem que recompilar TODAS as cvs... 
+	 - as únicas q não precisam são a padrão da sap, varsis-list e varsis-bi...
+	 - para qualquer alteracao na common precisa recompilar todas as outras
+
+Insuficient privileges ao executar a cv:
+  Abrir a aba properties da cv 
+     alterar o campo Apply privileges p/ Classical Analytical Privileges
+	 
+Trocar ao nome, pois fica em maiusculo ao copiar
+   - copiar na perspectiva Modeler
+   - gravar no repositorio, para gravar em disco
+   - procurar o arquivo no disco
+   - alterar o nome no arquivo
+   - fechar o hana
+   - reabrir e ativar no repositorio
+   - ir em System
+   - abrir e reativar a cv
+   - excluir a antiga, ainda em system..
+   - voltar ao repositorio
+   - fazer checkout para pegar a versao que foi alterada no system
+   - salvar novamente no repositorio
+Quando cubo:
+  public override bool RewriteQueryNeeded => true;
+	 
+Erros:
+   - Cuidado com a chave primaria, se repetir não dá erro no banco e nem no postman, mas vai dar erro no programa
+   

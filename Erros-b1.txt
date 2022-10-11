@@ -1,0 +1,14 @@
+Erros nas acoes:
+  Has no Open Balance
+      Tentando pagar um lancamento que já foi pago, não há mais saldo.
+  Unbalanced
+      Tentando pagar com valores incorretos, nao balanceados  
+  Invaid payment to name
+      Erro de endereco na invoice: Pagar a <banco> - estava vazio 
+	     devido a erro no cadastro do PN, aba Enderecos, 
+		                                   pagar a 'COBRANÇA'
+										   Ponto de Entrega: 'PADRÃO'
+										   ''estava vazio''
+  -10 The consolidating BP behind one or more of the selected transactions is different from the current consolidating BP 
+    PN com outro Pn no campo "Consolidação do Pn" -> Aba Contabilidade do cadastro do PN
+	

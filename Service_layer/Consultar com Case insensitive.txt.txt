@@ -1,0 +1,2 @@
+Para consultar com case Insensitive, colocar no header:
+B1S-CaseInsensitive = true

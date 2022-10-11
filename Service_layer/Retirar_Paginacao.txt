@@ -1,0 +1,2 @@
+Para retirar a paginacao:
+  colocar B1S-PageSize = 0 no header
