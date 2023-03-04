@@ -1,0 +1,133 @@
+CREATE OR REPLACE PROCEDURE SP_S3ACCOUNTPAYABLEADDDDA()
+LANGUAGE SQLSCRIPT
+AS
+cardCode            NVARCHAR(15);
+factCardCode        NVARCHAR(15);
+cashingCardCode     NVARCHAR(15);
+branchCode          INT;
+taxId               NVARCHAR(20);
+factTaxId           NVARCHAR(20);
+branchTaxId         NVARCHAR(20);
+cashingTaxId        NVARCHAR(20);
+tPn                 Table(CardCode  NVARCHAR(25));
+tBranch             Table(BPLId     INT));
+rCount              INT;
+BEGIN
+	DECLARE CURSOR CUR_INTERMEDIATETABLE FOR
+		select I.*		
+			 from "HOMOLOGACAO"."@S3BANKFILEDDA" I
+			 where not exists(select 1
+			                   from "HOMOLOGACAO"."@S3PAGDDA" D
+			                  where D."Code" = I."Code")
+               and not exists( select 1
+                                 from "HOMOLOGACAO"."@S3PAGDDA"
+                                where "U_BPTAXID" = I."U_BPTAXID"
+                                  and "U_BRANCHTAXID" = I."U_BRANCHTAXID"
+                                  and "U_BANKCODE" = I."U_BANKCODE"
+                                  and "U_BANKINVOICEID" = I."U_BANKINVOICEID"
+                                  and "U_BANKINVOICENUM" = I."U_BANKINVOICENUM"
+                                  and "U_DUEDATE" = I."U_DUEDATE");     
+
+	FOR I AS CUR_INTERMEDIATETABLE DO
+        taxId = lpad(trim(I."U_BPTAXID"),15,'0');
+        factTaxId = lpad(trim(I."U_FACTTAXID"),15,'0');
+        cashingTaxId = lpad(trim(I."U_CASHINGTAXID"),15,'0');
+        branchTaxId = lpad(trim(I."U_BRANCHTAXID"),15,'0');
+        cardCode = '';
+        cashingCardCode = '';
+        factCardCode = '';
+        branchCode = 0;
+
+        tPn =  SELECT CardCode
+                 FROM "HOMOLOGACAO"."CRD7"
+                WHERE "CardCode" like 'F%'
+                  AND "Address" = 'PADRÃO'
+                  AND "TaxId0" is not null
+                  AND lpad(ifnull(replace(replace(replace("TaxId0",'.',''),'-',''),'/',''),''),15,'0') = taxId;
+        
+        IF (record_count(:tPn) = 1) THEN
+            BEGIN
+               DECLARE EXIT HANDLER FOR SQLEXCEPTION SELECT ::SQL_ERROR_CODE, ::SQL_ERROR_MESSAGE FROM DUMMY;
+               SELECT "CardCode"
+                  INTO cardCode
+                  FROM "HOMOLOGACAO"."CRD7"
+                 WHERE "CardCode" like 'F%'
+                   AND "Address" = 'PADRÃO'
+                   AND "TaxId0" is not null
+                   AND lpad(ifnull(replace(replace(replace("TaxId0",'.',''),'-',''),'/',''),''),15,'0') = taxId;
+            END;
+        END IF;
+
+        tPn =  SELECT CardCode
+                 FROM "HOMOLOGACAO"."CRD7"
+                WHERE "CardCode" like 'F%'
+                  AND "Address" = 'PADRÃO'
+                  AND "TaxId0" is not null
+                  AND lpad(ifnull(replace(replace(replace("TaxId0",'.',''),'-',''),'/',''),''),15,'0') = cashingTaxId;
+       
+       IF (record_count(:tPn) = 1) THEN
+           BEGIN
+               SELECT "CardCode"
+                  INTO cashingCardCode
+                  FROM "HOMOLOGACAO"."CRD7"
+                 WHERE "CardCode" like 'F%'
+                   AND "Address" = 'PADRÃO'
+                   AND "TaxId0" is not null
+                   AND lpad(ifnull(replace(replace(replace("TaxId0",'.',''),'-',''),'/',''),''),15,'0') = cashingTaxId;
+            END;
+        END IF;
+
+        tPn =  SELECT CardCode
+                 FROM "HOMOLOGACAO"."CRD7"
+                WHERE "CardCode" like 'F%'
+                  AND "Address" = 'PADRÃO'
+                  AND "TaxId0" is not null
+                  AND lpad(ifnull(replace(replace(replace("TaxId0",'.',''),'-',''),'/',''),''),15,'0') = factTaxId;
+       
+        IF (record_count(:tPn) = 1) THEN
+            BEGIN
+               SELECT "CardCode"
+                  INTO factCardCode
+                  FROM "HOMOLOGACAO"."CRD7"
+                 WHERE "CardCode" like 'F%'
+                   AND "Address" = 'PADRÃO'
+                   AND "TaxId0" is not null
+                   AND lpad(ifnull(replace(replace(replace("TaxId0",'.',''),'-',''),'/',''),''),15,'0') = factTaxId;
+            END;
+        END IF;
+
+        SELECT COUNT(*)
+          INTO rCount
+          FROM "HOMOLOGACAO".OBPL 
+         WHERE lpad(ifnull(replace(replace(replace("TaxIdNum",'.',''),'-',''),'/',''),''),15,'0') = branchTaxId;
+ 
+        IF (rCount = 1) then
+            BEGIN
+               SELECT "BPLId"
+                  INTO branchCode
+                  FROM "HOMOLOGACAO"."OBPL"
+                 WHERE lpad(ifnull(replace(replace(replace("TaxId0",'.',''),'-',''),'/',''),''),15,'0') = branchTaxId;
+            END;
+        END IF;
+        
+        IF (rCount = 1) THEN
+		    INSERT INTO "HOMOLOGACAO"."@S3PAGDDA"("Code","Name","U_BANKFILEID","U_CARDCODE","U_FACTCARDCODE","U_CASHINGCARDCODE","U_CARDTAXTYPE","U_BPTAXID","U_CACARDTAXTYPE",
+                                                "U_CASHINGTAXID","U_FACCARDTAXTYPE","U_FACTTAXID", "U_DOCDATE","U_DUEDATE","U_BANKINVOICEID","U_BANKINVOICENUM","U_BANKCODE",
+                                                "U_BANKBRANCH","U_GROSSVALUE","U_DISCOUNT","U_REDUCTION","U_BARCODE","U_BARCODEDIGIT","U_TICKETBANKCODE",
+                                                "U_FREEFIELD","U_CURRENCY","U_DUEDATEFACTOR","U_BONDPORTFOLIO","U_ACCOUNTNUMBER","U_BRANCHCODE","U_BRANCHTAXID",
+                                                "U_DISCOUNTCODE1","U_DISCOUNTCODE2","U_DISCOUNTCODE3","U_DISCOUNTDATE1","U_DISCOUNTDATE2",
+                                                "U_DISCOUNTDATE3","U_DISCOUNTVALUE1","U_DISCOUNTVALUE2","U_DISCOUNTVALUE3",
+                                                "U_FINECODE","U_FINEDATE","U_FINEVALUE","U_ACTPAYABLEID","U_STATUS","U_USERNAME",
+                                                "U_BINDINGON","U_BINDINGONTIME") 
+											    VALUES(I."Code",I."Name",I."Code",cardCode,factCardCode,cashingCardCode,I."U_CARDTAXTYPE",I."U_BPTAXID",I."U_CACARDTAXTYPE",
+                                                I."U_CASHINGTAXID",I."U_FACCARDTAXTYPE",I."U_FACTTAXID",I."U_DOCDATE",I."U_DUEDATE",I."U_BANKINVOICEID",I."U_BANKINVOICENUM",I."U_BANKCODE",
+                                                I."U_BANKBRANCH",I."U_GROSSVALUE",I."U_DISCOUNT",I."U_REDUCTION",I."U_BARCODE",I."U_BARCODEDIGIT",I."U_TICKETBANKCODE",
+                                                I."U_FREEFIELD",I."U_CURRENCY",I."U_DUEDATEFACTOR",I."U_BONDPORTFOLIO",I."U_ACCOUNTNUMBER", branchCode,I."U_BRANCHTAXID",
+                                                I."U_DISCOUNTCODE1",I."U_DISCOUNTCODE2",I."U_DISCOUNTCODE3",I."U_DISCOUNTDATE1",I."U_DISCOUNTDATE2",
+                                                I."U_DISCOUNTDATE3",I."U_DISCOUNTVALUE1",I."U_DISCOUNTVALUE2",I."U_DISCOUNTVALUE3",
+                                                I."U_FINECODE",I."U_FINEDATE",I."U_FINEVALUE",'','N','',
+                                                NULL,0);  
+       END IF;
+	END FOR;   
+    COMMIT;
+END;

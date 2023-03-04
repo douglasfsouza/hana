@@ -1,0 +1,29 @@
+Executar uma procedure:
+    Open Sql Console
+        ex: call SP_S3ACCOUNTPAYABLEADDDDA();
+		
+Depurar:
+   Obs:
+      A depuração é feita em outra perspectiva
+   Abrir a procedure já compilada no banco
+   Run as Configuration   
+   SAP Hana Stored Procedure
+	  Botão direito em 'SAP Hana Stored Procedure' 
+	      New Configuration
+		      selecionar a proc a ser depurada
+			  informar o parametros se necessario
+			  Botão debug
+   Colocar o botão 'debug'
+       click no botao Open Perspective
+	      selecionar Debug
+   Colocar um breakpoint
+       Menu Run  
+	      Toggle breakpoint
+   Iniciar a depuração
+        Na aba Debug  
+              selecionar a configuração criada
+                   botão direito em 'Relaunch' ou f11		
+   Necessário dar permissão para o usuario VS_RCP_USER
+       GRANT EXECUTE ON HOMOLOGACAO.SP_S3ACCOUNTPAYABLEADDDDA TO VS_RCP_USER;
+		  
+		 		

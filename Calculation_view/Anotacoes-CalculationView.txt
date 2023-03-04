@@ -56,4 +56,5 @@ Quando cubo:
 	 
 Erros:
    - Cuidado com a chave primaria, se repetir não dá erro no banco e nem no postman, mas vai dar erro no programa
+   - replace(replace(replace(.. nas formulas usa bastante memoria e da erro com muitos registros
    
